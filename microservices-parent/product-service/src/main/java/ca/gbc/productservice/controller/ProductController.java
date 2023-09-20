@@ -31,7 +31,7 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
-    @PutMapping({"/{productId}"})   //exract the product from the incoming url
+    @PutMapping({"/{productId}"})   //extract the product from the incoming url
     public ResponseEntity<?>_updateProduct(@PathVariable ("productId") String productId,
                                            @RequestBody ProductRequest productRequest){
         String updateProductId = productService.updateProduct(productId, productRequest);
