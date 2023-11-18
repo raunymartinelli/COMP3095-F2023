@@ -7,7 +7,7 @@
 # --------------------
 
 # base image
-FROM gradle:8.3-jdk17-slim AS builder
+FROM gradle:8.3-jdk17 AS builder
 
 # Copy the application files from the host machine to the image filesystem
 COPY --chown=gradle:gradle . /home/gradle/src

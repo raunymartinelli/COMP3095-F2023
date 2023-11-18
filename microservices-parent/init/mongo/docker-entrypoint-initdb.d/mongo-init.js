@@ -5,8 +5,8 @@ db = db.getSiblingDB('product-service');
 
 db.createUser(
     {
-        user: 'mongoadmin',
-        password: 'password',
+        user: 'rootadmin',
+        pwd: 'password',
         roles: [{role: 'readWrite', db: 'product-service'}]
     }
 );
