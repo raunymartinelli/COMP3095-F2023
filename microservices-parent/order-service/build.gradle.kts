@@ -45,6 +45,11 @@ dependencies {
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.testcontainers:junit-jupiter")
     implementation("io.netty:netty-resolver-dns-native-macos:4.1.72.Final:osx-x86_64")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.0.3")
+    implementation("io.micrometer:micrometer-observation:1.11.3")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave:1.1.4")
+    implementation("io.zipkin.reporter2:zipkin-reporter-brave:2.16.4")
+    implementation("org.springframework.kafka:spring-kafka:3.1.0")
 
 }
 //tasks.register("prepareKotlinBuildScriptModel"){}

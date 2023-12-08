@@ -36,9 +36,3 @@ EXPOSE 8083
 
 ENTRYPOINT ["java", "-jar", "/app/inventory-service.jar"]
 
-# Okay, so eureka server and api-gateway are working, now
-#   the "issue" here for running this using IDE is that,
-#   you don't have any database running.
-#   So is not possible to run it successfully from IDE, make sense? :c
-#   Yes, Can You create database for me?
-#   yes sure, we can create some databases to test

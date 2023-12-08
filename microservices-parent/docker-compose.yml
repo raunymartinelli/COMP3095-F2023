@@ -1,6 +1,29 @@
 version: '3.8'
 
 services:
+
+  keycloak:
+    image: mihaibob/keycloak:15.0.1
+    ports:
+      - "8080:8080"
+    environment:
+      MIHAIBOB_LOG_MANAGER_ROOT_LOGGER: DEBUG
+      DB_VENDOR: postgres
+      DB_ADDR: postgres-keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: password
+      KEYCLOAK_IMPORT: /opt/mihaibob/keycloak/realms/spring-boot-microservices-realm.json
+    volumes:
+      - ./realms/:/opt/mihaibob/keycloak/realms
+    container_name: keycloak
+    depends_on:
+      - postgres-keycloak
+    restart: unless-stopped
+    networks:
+      - spring
+
   api-gateway:
     image: api-gateway
     ports:
@@ -87,6 +110,27 @@ services:
     networks:
       - spring
 
+
+  #---------Notification Services-----------
+  notification-service:
+    image: notification-service
+    ports:
+      - "8283:8283"
+    build:
+      context: ./notification-service
+      dockerfile: ./Dockerfile
+    container_name: notification-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      eureka.client.serviceUrl.defaultZone: http://discovery-service:8761/eureka/
+    depends_on:
+      - mongodb
+      - discovery-service
+      - order-service
+      - broker
+    networks:
+      - spring
+
   #------Order Postgres--------
   postgres-order:
     image: postgres
@@ -104,7 +148,24 @@ services:
     networks:
       - spring
 
-  #------Inventory Postgres---------
+    #------ Keycloak Postgres---------
+  postgres-keycloak:
+    container_name: postgres-keycloak
+    image: postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+      - ./data/postgres/postgres-keycloak:/data/postgres
+    ports:
+      - "5431:5432"
+    restart: unless-stopped
+    networks:
+      - spring
+
+    #------Inventory Postgres---------
   postgres-inventory:
     image: postgres
     ports:
@@ -167,9 +228,62 @@ services:
     networks:
       - spring
 
+  zipkin:
+    image:  openzipkin/zipkin:latest
+    restart: unless-stopped
+    ports:
+      - "9411:9411"
+    container_name: zipkin
+    networks:
+      - spring
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper_local_comp3095
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - spring
+
+  broker:
+    image: confluentinc/cp-kafka:latest
+    container_name: broker_local_comp3095
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - spring
+
+  kafka-ui:
+    container_name: kafka_local_ui_comp3095
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8282:8080
+    depends_on:
+      - zookeeper
+      - broker
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_JMXPORT: 9997
+      SERVER_SERVLET_CONTEXT_PATH: /kafkaui
+    networks:
+      - spring
+
+
 networks:
   spring:
     driver: bridge
-
-
-# the build will take some time, oh lol.

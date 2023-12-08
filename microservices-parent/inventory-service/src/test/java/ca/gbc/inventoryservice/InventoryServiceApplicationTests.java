@@ -73,11 +73,3 @@ class InventoryServiceApplicationTests extends AbstractContainerBaseTest {
 	}
 }
 
-// uhuuuu
-// very thank you
-// muito obrigado meu amigo...
-// did you got it?
-// hehe, no worries, I got everything but the order-service, actually, can I borrow yours?
-// of course...
-// of course
-// do you wanna i send you?, yep, just a second
